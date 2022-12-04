@@ -1,6 +1,7 @@
 import copy
 import matplotlib.pyplot as plt
 import numpy as np
+
 def simple_bar_chart(x_axis_data, y_axis_data, labels=None, bar_width=20, bar_height=5):
     """Makes a basic bar chart.
 
