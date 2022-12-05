@@ -344,7 +344,6 @@ class MyNaiveBayesClassifier:
             att_list = ["att" + str(i+1) + "=" + str(att_list[i]) for i in range(len(att_list))]
             max_prob = 0
             prediction = ""
-            print(att_list)
             for classification in self.priors:
                 #list of posteriors for each attribute of the instance
                 instance_posts = [self.posteriors[classification][att_list[i]] for i in range(len(att_list))]

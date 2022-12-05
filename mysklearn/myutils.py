@@ -1,6 +1,26 @@
 import copy
+import numpy as np
 
 from mysklearn import myevaluation
+
+def compute_distance(point1, point2):
+    """Compute the Euclidean distance between two points of either 2 or 3 dimensions
+    Args:
+        point1(list of ints or floats): the first point
+        point2(list of ints or floats): the second point
+    Returns:
+        float: the distance between the two points
+    """
+    try:
+        if (len(point1) != 2 and len(point1) != 3) or (len(point2) != 2 and len(point2) != 3):
+            raise Exception("Data must be 2 or 3 dimensional and parallel. Try again.")
+        if len(point1) == 2:
+            return np.sqrt((point2[0] - point1[0])**2 + (point2[1]-point1[1])**2)
+        return np.sqrt((point2[0] - point1[0])**2 + (point2[1]-point1[1])**2 + (point2[2]-point1[2])**2)
+    except:
+        if point1 == point2:
+            return 0
+        return 1
 
 def get_unique_values(non_unique_values):
     """finds the unique values in a given list of values
@@ -169,3 +189,30 @@ def strat_cross_val_predict(k, X, y, n_splits, random_state=9, shuffle=False):
                 [y[i] for i in fold[0]], [y[j] for j in fold[1]]])
         splits.append(this_split)
     return splits
+
+def confusion_matrix_values(predicted, actual, positive_class):
+    """Finds and returns true positive, true negative, false positive, and false negative
+    for a given pair of predicted and actual values
+    Args:
+        predicted(list of obj): the predicted values
+        actual(list of obj): parallel to predicted, the actual/expected values
+        positive_class(obj): the class we will be calling positive for distinguishing P and N
+    Returns:
+        int: number of true positives
+        int: number of true negatives
+        int: number of false positives
+        int: number of false negatives
+    """
+    true_p, true_n, false_p, false_n = 0, 0, 0, 0
+    for i in range(len(predicted)):
+        if predicted[i] == positive_class:
+            if actual[i] == positive_class:
+                true_p += 1
+            else:
+                false_p += 1
+        else:
+            if actual[i] != positive_class:
+                true_n += 1
+            else:
+                false_n += 1
+    return true_p, true_n, false_p, false_n
