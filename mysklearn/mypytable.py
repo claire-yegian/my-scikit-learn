@@ -71,6 +71,8 @@ class MyPyTable:
             header(str): the header for the new column
             new_data(list): the data to be added to the table, in order
         """
+        if header in self.column_names:
+            raise Exception("Column already exists. Change name")
         self.column_names.append(header)
         for i in range(len(self.data)):
             self.data[i].append(new_data[i])
