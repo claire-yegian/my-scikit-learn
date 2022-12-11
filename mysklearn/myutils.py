@@ -216,3 +216,263 @@ def confusion_matrix_values(predicted, actual, positive_class):
             else:
                 false_n += 1
     return true_p, true_n, false_p, false_n
+
+def select_attribute(instances, header, attributes, attribute_domains):
+    """Finds the attribute in a given set of attributes with the lowest entropy
+    Args:
+        instances(list of lists): the instances of the dataset
+        header(list of str): all attributes in the dataset
+        attributes(list of str): the attributes from which we can selecct
+        attribute_domains(dict of lists): domains of all attributes in the header
+    Returns:
+        str: the attribute with the lowest entropy
+    """
+    if len(attributes) == 1:
+        return attributes[0]
+
+    all_entropies = {}
+    for attribute in attributes:
+        att_idx = header.index(attribute)
+        weighted_entropy = 0
+        for value in attribute_domains[attribute]:
+            entropy = 0
+
+            #count all occurances of the attribute with that value
+            occurances_of_value = 0
+            for instance in instances:
+                if instance[att_idx] == value:
+                    occurances_of_value += 1
+
+            if occurances_of_value > 0:
+                #count all occurances of each classification for the attribute with that value
+                for classification in attribute_domains[header[-1]]:
+                    count = 0
+                    for instance in instances:
+                        if instance[att_idx] == value and instance[-1] == classification:
+                            count += 1
+                    if count > 0:
+                        entropy += - (count / occurances_of_value) * np.log2(count / occurances_of_value)
+            # compute weighted entroppy for that attribute as we go through each value in the domain
+            weighted_entropy += (occurances_of_value / len(instances)) * entropy
+        # store weighted entropies in a dictonary of all attributes
+        all_entropies[attribute] = weighted_entropy
+
+    # find the smallest entropy
+    min_entropy = 1
+    best_att = attributes[0]
+    for att, score in all_entropies.items():
+        if score < min_entropy:
+            min_entropy = score
+            best_att = att
+    return best_att # and return that attribute
+
+def partition_instances(instances, attribute, header, attribute_domains):
+    """Groups instances by attribute domain
+    Args:
+        instances(list of lists): the instances of the dataset
+        attribute(str): the attribute we're grouping by domain
+        header(list of str): all attributes in the dataset
+        attribute_domains(dict of lists): domains of all attributes in the header
+    Returns:
+        dict of lists of lists: key is a value in the attribute's domain, value is a list of the
+            instances that have that value for that attribute
+    """
+    att_index = header.index(attribute)
+    att_domain = attribute_domains["att" + str(att_index + 1)]
+    partitions = {}
+    for att_value in att_domain:
+        partitions[att_value] = []
+        for instance in instances:
+            if instance[att_index] == att_value:
+                partitions[att_value].append(instance)
+    return partitions
+
+def same_class_label(instances):
+    """Finds if a list of instances are all members of the same class
+    Args:
+        instances(list of lists): the instances of the dataset
+    Returns:
+        boolean: True if all instances have the same class label, false if otherwise
+    Note: assumes class label is the last element in an instance's list of attribute values
+    """
+    first_label = instances[0][-1]
+    for instance in instances:
+        if instance[-1] != first_label:
+            return False
+    # if we get here, all class labels are the same
+    return True
+
+def make_majority_leaf(instances, out_of):
+    """Makes a majority leaf node out of a list of instances
+    Args:
+        instances(list of lists): the instances from which to make the node
+    Returns:
+        list of obj: a list representation of a majority leaf node, including the majority class
+            vote at index 1 (alphabetical first vote if it's a tie)
+    """
+    # count number of instances matching each classification
+    vote_count = {}
+    for instance in instances:
+        if instance[-1] not in vote_count:
+            vote_count[instance[-1]] = 1
+        else:
+            vote_count[instance[-1]] += 1
+
+    # find the classification that appears most
+    tie = []
+    most_votes = 0
+    most_voted = None
+    for voted, votes in vote_count.items():
+        if votes > most_votes:
+            most_votes = votes
+            most_voted = voted
+            tie = [voted]
+        elif votes == most_votes:
+            tie.append(voted)
+
+    winning_vote = most_voted
+    if len(tie) > 1: # if it's a tie, pick the alphabetical first classification
+        sorted_votes = sorted(tie)
+        winning_vote = sorted_votes[0]
+
+    return ["Leaf", winning_vote, len(instances), out_of]
+
+def tdidt(current_instances, available_attributes, header, attribute_domains, last_split_len):
+    """Recursively builds a decision tree using TDIDT (top-down induction of decision trees)
+    Args:
+        current_instances(list of lists): the currently available instances of the dataset
+        available_attributes(list ofstr): the currently available attributes to split on
+        header(list of str): all attributes in the dataset
+        attribute_domains(dict of lists): domains of all attributes in the header
+        last_split_len(int): the number of instances in the last split (used if we need to backtrack
+            on an empty partition)
+    Returns:
+        lists of lists: a list representation of a decision tree
+    """
+    # select an attribute to split on
+    split_attribute = select_attribute(current_instances, header, available_attributes, attribute_domains)
+    available_attributes.remove(split_attribute)
+    # cannot split on this attribute again in this branch of tree
+    tree = ["Attribute", split_attribute]
+
+    # group data by attribute domains (creates pairwise disjoint partitions)
+    partitions = partition_instances(current_instances, split_attribute, header, attribute_domains)
+
+    # restructure partitions so that it's in alphabetical order
+    alphabetized_atts = sorted(partitions.keys())
+    alphabetized_atts = [(att_value, partitions[att_value]) for att_value in alphabetized_atts]
+    partitions = alphabetized_atts
+
+    # for each partition, repeat unless one of the following occurs (base case)
+    for att_value, att_partition in partitions:
+        value_subtree = ["Value", att_value]
+        # base case 1: all class labels of the partition are the same
+        if len(att_partition) > 0 and same_class_label(att_partition):
+            subtree = ["Leaf", att_partition[0][-1], len(att_partition), len(current_instances)]
+        # base case 2: no more attributes to select (clash)
+        elif len(att_partition) > 0 and len(available_attributes) == 0:
+            subtree = make_majority_leaf(att_partition, len(current_instances))
+        # base case 3: no more instances to partition (empty partition)
+        elif len(att_partition) == 0:
+            return make_majority_leaf(current_instances, last_split_len)
+        # otherwise, recurse
+        else:
+            subtree = tdidt(att_partition, available_attributes.copy(), header, attribute_domains, len(current_instances))
+        value_subtree.append(subtree)
+        tree.append(value_subtree)
+    return tree
+
+def tdidt_predict(tree, instance, header):
+    """Recursively predicts the class of an instance using TDIDT and a preconstructed decision tree
+    Args:
+        tree(list of lists): the tree we're using to predict on
+        instance(list of lists): the instance for we're trying to classify
+        header(list of str): all attributes in the dataset
+    Returns:
+        str: the class prediction
+    """
+    info_type = tree[0] # Attribute or Leaf
+    if info_type == "Leaf":
+        return tree[1] # base case, return label
+    # if Attribute node, need to find value
+    att_index = header.index(tree[1])
+    for i in range(2, len(tree)):
+        value_list = tree[i]
+        if value_list[1] == instance[att_index]:
+            # we have a match, recurse on this value's subtree
+            return tdidt_predict(value_list[2], instance, header)
+
+def tdidt_write_rules(tree, attribute_names, class_name, header):
+    """Recursively builds a list of elements of rules that can later be constructed into strings
+    Args:
+        tree(list of lists): the tree we're writing rules for
+        attribute_names(list of str): names to use for the attributes in the rules (if none given,
+            "att1", "att2", etc...)
+        class_name(str): name to use for class in the rules
+        header(list of str): all attributes in the dataset
+    Returns:
+        list of lists of str: a list of elements of a rule where all but the last element are on the
+            left hand side, and the last element is the classification on the right hand side
+    """
+    if class_name is None:
+        class_name = "class"
+
+    info_type = tree[0] # Attribute or Leaf
+    if info_type == "Leaf":
+        return [class_name + " = " + tree[1]] # base case, return class label (THEN part of rule)
+
+    # otherwise, add the attribute (IF part of rule) to the front of each recursively discovered rule
+    rule_list = []
+    for i in range(2, len(tree)):
+        if attribute_names: # if we've been given attribute names to use
+            new_rule = [attribute_names[header.index(tree[1])] + " == " + tree[i][1]]
+        else: # otherwise, default to 'att1', 'att2', etc...
+            new_rule = [tree[1] + " == " + tree[i][1]]
+        rules_to_add = tdidt_write_rules(tree[i][2], attribute_names, class_name, header) # recursively discovered rules
+        for rule in rules_to_add:
+            to_add = new_rule.copy()
+            if rule[:len(class_name)] == class_name: # if it's a class label, append it
+                to_add.append(rule)
+            else:
+                to_add += rule # otherwise, add it so we don't get nested brackets
+            rule_list.append(to_add)
+    return rule_list
+
+def make_dotfile(tree, lines, id, last_item_id, last_item_val, connections_made):
+    """Collects the lines that need to be added to a .dot file in order to make a visual representation of the
+        tree using a Graphviz .pdf file.
+    Args:
+        tree(list of lists): the tree we're trying to visually represent
+        lines(list of str): the collection of lines to be written to the .dot file
+        id(int): one of many identifiers used to distinguish between nodes (see note below)
+        last_item_id(str): the full string identifier of the previous node
+        last_item_val(str): the value connecting the previous and current nodes
+        connections_made(list of str): a record of the connections between nodes, so we don't make the same one twice
+    Returns:
+        list of str: a complete collection of all lines that must be added to the .dot file
+    Note: the id, current_id, and len(connections_made) are used to help distinguish between nodes as the function
+        builds the tree
+    """
+    info_type = tree[0] # at a leaf node
+    if info_type == "Leaf":
+        lines.append(tree[1] + str(id) + str(len(connections_made)) + " [label=" + tree[1] + ", shape=circle];\n")
+        lines.append(last_item_id + " -- " + tree[1] + str(id) + str(len(connections_made)) + " [label=" + \
+            last_item_val + "];\n")
+        return lines
+
+    for i in range(2, len(tree)):
+        current_id = 0 # one distinguishing identifier
+        if info_type == "Attribute":
+            lines.append(tree[1] + str(id) + str(current_id) + " [label=" + tree[1] + ", shape=box];\n")
+            if last_item_id: # if it's not a root node
+                connection = last_item_id + " -- " + tree[1] + str(id) + str(current_id)
+                if connection not in connections_made: # make the connection if not already made
+                    lines.append(last_item_id + " -- " + tree[1] + str(id) + str(current_id) + \
+                        " [label=" + last_item_val + ", shape=box];\n")
+                    connections_made.append(connection)
+            make_dotfile(tree[i], lines, id + 1, tree[1] + str(id) + str(current_id), None, connections_made)
+        else: # at a value node
+            new_lines = make_dotfile(tree[i], lines, id + 1, last_item_id, tree[1], connections_made)
+            lines.append(new_lines)
+        current_id += 1
+    return lines
