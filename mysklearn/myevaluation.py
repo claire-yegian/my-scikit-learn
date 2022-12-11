@@ -44,6 +44,47 @@ def stratified_kfold_split(X, y, n_splits=5, random_state=None, shuffle=False):
 
     return folds
 
+def bootstrap_sample(X, y=None, n_samples=None, random_state=None):
+    """Split dataset into bootstrapped training set and out of bag test set.
+    Args:
+        X(list of list of obj): The list of samples
+        y(list of obj): The target y values (parallel to X)
+            Default is None (in this case, the calling code only wants to sample X)
+        n_samples(int): Number of samples to generate. If left to None (default) this is automatically
+            set to the first dimension of X.
+        random_state(int): integer used for seeding a random number generator for reproducible results
+    Returns:
+        X_sample(list of list of obj): The list of samples
+        X_out_of_bag(list of list of obj): The list of "out of bag" samples (e.g. left-over samples)
+        y_sample(list of obj): The list of target y values sampled (parallel to X_sample)
+            None if y is None
+        y_out_of_bag(list of obj): The list of target y values "out of bag" (parallel to X_out_of_bag)
+            None if y is None
+    Notes:
+        Loosely based on sklearn's resample():
+            https://scikit-learn.org/stable/modules/generated/sklearn.utils.resample.html
+        Sample indexes of X with replacement, then build X_sample and X_out_of_bag
+            as lists of instances using sampled indexes (use same indexes to build
+            y_sample and y_out_of_bag)
+    """
+    if n_samples is None:
+        n_samples = len(X)
+    
+    if random_state is None:
+        np.random.seed(0)
+    else:
+        np.random.seed(random_state)
+
+    sampled = list(set(np.random.randint(len(X), size=n_samples)))
+    out_of_bag = []
+    for i in range(len(X)):
+        if not i in sampled:
+            out_of_bag.append(i)
+    
+    if y is None:
+        return [X[i] for i in sampled], [X[j] for j in out_of_bag], None, None
+    return [X[i] for i in sampled], [X[j] for j in out_of_bag], [y[i] for i in sampled], [y[j] for j in out_of_bag]
+
 def confusion_matrix(y_true, y_pred, labels):
     """Compute confusion matrix to evaluate the accuracy of a classification.
     Args:
