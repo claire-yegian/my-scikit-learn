@@ -8,7 +8,8 @@
 ##############################################
 import numpy as np
 
-from mysklearn import myutils
+#from mysklearn import myutils
+import myutils
 
 def stratified_kfold_split(X, y, n_splits=5, random_state=None, shuffle=False):
     """Split dataset into stratified cross validation folds.
@@ -28,6 +29,28 @@ def stratified_kfold_split(X, y, n_splits=5, random_state=None, shuffle=False):
         Loosely based on sklearn's StratifiedKFold split():
             https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold.html#sklearn.model_selection.StratifiedKFold
     """
+    splits = stratified_split(X, y, n_splits, random_state, shuffle)
+    folds = [(myutils.split(splits, i)) for i in range(n_splits)]
+
+    return folds
+
+def stratified_split(X, y, n_splits=5, random_state=None, shuffle=False):
+    """Split dataset into n stratefied subsets using the card-dealing method
+    Args:
+        X(list of list of obj): The list of instances (samples).
+            The shape of X is (n_samples, n_features)
+        y(list of obj): The target y values (parallel to X).
+            The shape of y is n_samples
+        n_splits(int): Number of folds.
+        random_state(int): integer used for seeding a random number generator for reproducible results
+        shuffle(bool): whether or not to randomize the order of the instances before creating folds
+    Returns:
+        splits(list of lists): A list of n subsets of the data, stratified (presorted by classification) and
+            divided using the card-dealing method
+    Notes:
+        Loosely based on sklearn's StratifiedKFold split():
+            https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold.html#sklearn.model_selection.StratifiedKFold
+    """
     if random_state is not None:
         np.random.seed(random_state)
     tracking_dict = {i: y[i] for i in range(len(y))}
@@ -40,9 +63,7 @@ def stratified_kfold_split(X, y, n_splits=5, random_state=None, shuffle=False):
     splits = [[] for i in range(n_splits)]
     for i in range(len(X)):
         splits[i % n_splits].append(tracking_dict[i][0])
-    folds = [(myutils.split(splits, i)) for i in range(n_splits)]
-
-    return folds
+    return splits
 
 def bootstrap_sample(X, y=None, n_samples=None, random_state=None):
     """Split dataset into bootstrapped training set and out of bag test set.

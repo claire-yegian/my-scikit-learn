@@ -1,7 +1,9 @@
 import copy
 import numpy as np
 
-from mysklearn import myevaluation
+#from mysklearn import myevaluation
+import myevaluation
+
 
 def compute_distance(point1, point2):
     """Compute the Euclidean distance between two points of either 2 or 3 dimensions
@@ -13,7 +15,8 @@ def compute_distance(point1, point2):
     """
     try:
         if (len(point1) != 2 and len(point1) != 3) or (len(point2) != 2 and len(point2) != 3):
-            raise Exception("Data must be 2 or 3 dimensional and parallel. Try again.")
+            raise Exception(
+                "Data must be 2 or 3 dimensional and parallel. Try again.")
         if len(point1) == 2:
             return np.sqrt((point2[0] - point1[0])**2 + (point2[1]-point1[1])**2)
         return np.sqrt((point2[0] - point1[0])**2 + (point2[1]-point1[1])**2 + (point2[2]-point1[2])**2)
@@ -22,9 +25,10 @@ def compute_distance(point1, point2):
             return 0
         return 1
 
+
 def get_unique_values(non_unique_values):
     """finds the unique values in a given list of values
-    
+
     Args:
         non_unique_values(list): list of values
     Returns:
@@ -35,6 +39,7 @@ def get_unique_values(non_unique_values):
         if val not in unique_values:
             unique_values.append(val)
     return unique_values
+
 
 def get_frequency_of_value(target_val, all_value_instances):
     """finds the frequency of a given value in a given list of values
@@ -52,6 +57,7 @@ def get_frequency_of_value(target_val, all_value_instances):
             count += 1
     return count
 
+
 def get_frequency_of_multiple_values(target_values, all_value_instances):
     """finds the frequencies of multiple values in a given list
 
@@ -67,6 +73,7 @@ def get_frequency_of_multiple_values(target_values, all_value_instances):
         frequencies.append(get_frequency_of_value(val, all_value_instances))
     return frequencies
 
+
 def compute_equal_frequency_cutoffs(instances, num_bins):
     bin_size = len(instances)//num_bins
     cutoffs = []
@@ -75,7 +82,8 @@ def compute_equal_frequency_cutoffs(instances, num_bins):
     cutoffs.append(instances[-1])
     return cutoffs
 
-def discretize_with_cut_offs(y_values, cut_offs:list):
+
+def discretize_with_cut_offs(y_values, cut_offs: list):
     """discretizes a set of data based on given cut off values.
 
         Args:
@@ -106,6 +114,7 @@ def discretize_with_cut_offs(y_values, cut_offs:list):
             y_copy[index] = "very popular"
     return y_copy
 
+
 def count_occurances(X_data, att_idx, attribute, y_data, classification):
     """Count the occurances of an instance with a specific classification and attribute value
     Args:
@@ -127,6 +136,7 @@ def count_occurances(X_data, att_idx, attribute, y_data, classification):
             count += 1
     return count
 
+
 def get_attributes_dict(header, instances):
     """Creates a dictionary of all values in each attribute domain for a given header and set of
         instances. Keys of the dictionary are stored as "att1", "att2", etc, not the string attribute
@@ -137,7 +147,7 @@ def get_attributes_dict(header, instances):
     Returns:
         dict of lists: keys are the attributes, values are all values in that attribute's domain
     """
-    attributes = {} #build a dictionary to track all of the occurances of each attribute
+    attributes = {}  # build a dictionary to track all of the occurances of each attribute
     for i in range(len(header)):
         occurances = []
         for value in instances:
@@ -145,6 +155,7 @@ def get_attributes_dict(header, instances):
                 occurances.append(value[i])
         attributes["att"+str(i+1)] = occurances
     return attributes
+
 
 def split(folds, idx):
     """Split a list of folds into training and testing sets given the index of
@@ -163,6 +174,7 @@ def split(folds, idx):
             for item in folds[i]:
                 train.append(item)
     return train, test
+
 
 def strat_cross_val_predict(k, X, y, n_splits, random_state=9, shuffle=False):
     """Build k kfold train/test splits using myevaluation's kfold_split and
@@ -185,10 +197,11 @@ def strat_cross_val_predict(k, X, y, n_splits, random_state=9, shuffle=False):
 
         # convert the folds from indicies to values
         for fold in kfolds:
-            this_split.append([[X[i] for i in fold[0]], [X[j] for j in fold[1]], \
-                [y[i] for i in fold[0]], [y[j] for j in fold[1]]])
+            this_split.append([[X[i] for i in fold[0]], [X[j] for j in fold[1]],
+                               [y[i] for i in fold[0]], [y[j] for j in fold[1]]])
         splits.append(this_split)
     return splits
+
 
 def confusion_matrix_values(predicted, actual, positive_class):
     """Finds and returns true positive, true negative, false positive, and false negative
@@ -217,6 +230,7 @@ def confusion_matrix_values(predicted, actual, positive_class):
                 false_n += 1
     return true_p, true_n, false_p, false_n
 
+
 def select_attribute(instances, header, attributes, attribute_domains):
     """Finds the attribute in a given set of attributes with the lowest entropy
     Args:
@@ -237,23 +251,25 @@ def select_attribute(instances, header, attributes, attribute_domains):
         for value in attribute_domains[attribute]:
             entropy = 0
 
-            #count all occurances of the attribute with that value
+            # count all occurances of the attribute with that value
             occurances_of_value = 0
             for instance in instances:
                 if instance[att_idx] == value:
                     occurances_of_value += 1
 
             if occurances_of_value > 0:
-                #count all occurances of each classification for the attribute with that value
+                # count all occurances of each classification for the attribute with that value
                 for classification in attribute_domains[header[-1]]:
                     count = 0
                     for instance in instances:
                         if instance[att_idx] == value and instance[-1] == classification:
                             count += 1
                     if count > 0:
-                        entropy += - (count / occurances_of_value) * np.log2(count / occurances_of_value)
+                        entropy += - (count / occurances_of_value) * \
+                            np.log2(count / occurances_of_value)
             # compute weighted entroppy for that attribute as we go through each value in the domain
-            weighted_entropy += (occurances_of_value / len(instances)) * entropy
+            weighted_entropy += (occurances_of_value /
+                                 len(instances)) * entropy
         # store weighted entropies in a dictonary of all attributes
         all_entropies[attribute] = weighted_entropy
 
@@ -264,7 +280,8 @@ def select_attribute(instances, header, attributes, attribute_domains):
         if score < min_entropy:
             min_entropy = score
             best_att = att
-    return best_att # and return that attribute
+    return best_att  # and return that attribute
+
 
 def partition_instances(instances, attribute, header, attribute_domains):
     """Groups instances by attribute domain
@@ -287,6 +304,7 @@ def partition_instances(instances, attribute, header, attribute_domains):
                 partitions[att_value].append(instance)
     return partitions
 
+
 def same_class_label(instances):
     """Finds if a list of instances are all members of the same class
     Args:
@@ -301,6 +319,7 @@ def same_class_label(instances):
             return False
     # if we get here, all class labels are the same
     return True
+
 
 def make_majority_leaf(instances, out_of):
     """Makes a majority leaf node out of a list of instances
@@ -331,11 +350,12 @@ def make_majority_leaf(instances, out_of):
             tie.append(voted)
 
     winning_vote = most_voted
-    if len(tie) > 1: # if it's a tie, pick the alphabetical first classification
+    if len(tie) > 1:  # if it's a tie, pick the alphabetical first classification
         sorted_votes = sorted(tie)
         winning_vote = sorted_votes[0]
 
     return ["Leaf", winning_vote, len(instances), out_of]
+
 
 def tdidt(current_instances, available_attributes, header, attribute_domains, last_split_len):
     """Recursively builds a decision tree using TDIDT (top-down induction of decision trees)
@@ -350,17 +370,20 @@ def tdidt(current_instances, available_attributes, header, attribute_domains, la
         lists of lists: a list representation of a decision tree
     """
     # select an attribute to split on
-    split_attribute = select_attribute(current_instances, header, available_attributes, attribute_domains)
+    split_attribute = select_attribute(
+        current_instances, header, available_attributes, attribute_domains)
     available_attributes.remove(split_attribute)
     # cannot split on this attribute again in this branch of tree
     tree = ["Attribute", split_attribute]
 
     # group data by attribute domains (creates pairwise disjoint partitions)
-    partitions = partition_instances(current_instances, split_attribute, header, attribute_domains)
+    partitions = partition_instances(
+        current_instances, split_attribute, header, attribute_domains)
 
     # restructure partitions so that it's in alphabetical order
     alphabetized_atts = sorted(partitions.keys())
-    alphabetized_atts = [(att_value, partitions[att_value]) for att_value in alphabetized_atts]
+    alphabetized_atts = [(att_value, partitions[att_value])
+                         for att_value in alphabetized_atts]
     partitions = alphabetized_atts
 
     # for each partition, repeat unless one of the following occurs (base case)
@@ -368,7 +391,8 @@ def tdidt(current_instances, available_attributes, header, attribute_domains, la
         value_subtree = ["Value", att_value]
         # base case 1: all class labels of the partition are the same
         if len(att_partition) > 0 and same_class_label(att_partition):
-            subtree = ["Leaf", att_partition[0][-1], len(att_partition), len(current_instances)]
+            subtree = ["Leaf", att_partition[0][-1],
+                       len(att_partition), len(current_instances)]
         # base case 2: no more attributes to select (clash)
         elif len(att_partition) > 0 and len(available_attributes) == 0:
             subtree = make_majority_leaf(att_partition, len(current_instances))
@@ -377,10 +401,12 @@ def tdidt(current_instances, available_attributes, header, attribute_domains, la
             return make_majority_leaf(current_instances, last_split_len)
         # otherwise, recurse
         else:
-            subtree = tdidt(att_partition, available_attributes.copy(), header, attribute_domains, len(current_instances))
+            subtree = tdidt(att_partition, available_attributes.copy(
+            ), header, attribute_domains, len(current_instances))
         value_subtree.append(subtree)
         tree.append(value_subtree)
     return tree
+
 
 def tdidt_predict(tree, instance, header):
     """Recursively predicts the class of an instance using TDIDT and a preconstructed decision tree
@@ -391,9 +417,9 @@ def tdidt_predict(tree, instance, header):
     Returns:
         str: the class prediction
     """
-    info_type = tree[0] # Attribute or Leaf
+    info_type = tree[0]  # Attribute or Leaf
     if info_type == "Leaf":
-        return tree[1] # base case, return label
+        return tree[1]  # base case, return label
     # if Attribute node, need to find value
     att_index = header.index(tree[1])
     for i in range(2, len(tree)):
@@ -401,6 +427,7 @@ def tdidt_predict(tree, instance, header):
         if value_list[1] == instance[att_index]:
             # we have a match, recurse on this value's subtree
             return tdidt_predict(value_list[2], instance, header)
+
 
 def tdidt_write_rules(tree, attribute_names, class_name, header):
     """Recursively builds a list of elements of rules that can later be constructed into strings
@@ -417,26 +444,30 @@ def tdidt_write_rules(tree, attribute_names, class_name, header):
     if class_name is None:
         class_name = "class"
 
-    info_type = tree[0] # Attribute or Leaf
+    info_type = tree[0]  # Attribute or Leaf
     if info_type == "Leaf":
-        return [class_name + " = " + tree[1]] # base case, return class label (THEN part of rule)
+        # base case, return class label (THEN part of rule)
+        return [class_name + " = " + tree[1]]
 
     # otherwise, add the attribute (IF part of rule) to the front of each recursively discovered rule
     rule_list = []
     for i in range(2, len(tree)):
-        if attribute_names: # if we've been given attribute names to use
-            new_rule = [attribute_names[header.index(tree[1])] + " == " + tree[i][1]]
-        else: # otherwise, default to 'att1', 'att2', etc...
+        if attribute_names:  # if we've been given attribute names to use
+            new_rule = [attribute_names[header.index(
+                tree[1])] + " == " + tree[i][1]]
+        else:  # otherwise, default to 'att1', 'att2', etc...
             new_rule = [tree[1] + " == " + tree[i][1]]
-        rules_to_add = tdidt_write_rules(tree[i][2], attribute_names, class_name, header) # recursively discovered rules
+        rules_to_add = tdidt_write_rules(
+            tree[i][2], attribute_names, class_name, header)  # recursively discovered rules
         for rule in rules_to_add:
             to_add = new_rule.copy()
-            if rule[:len(class_name)] == class_name: # if it's a class label, append it
+            if rule[:len(class_name)] == class_name:  # if it's a class label, append it
                 to_add.append(rule)
             else:
-                to_add += rule # otherwise, add it so we don't get nested brackets
+                to_add += rule  # otherwise, add it so we don't get nested brackets
             rule_list.append(to_add)
     return rule_list
+
 
 def make_dotfile(tree, lines, id, last_item_id, last_item_val, connections_made):
     """Collects the lines that need to be added to a .dot file in order to make a visual representation of the
@@ -453,26 +484,31 @@ def make_dotfile(tree, lines, id, last_item_id, last_item_val, connections_made)
     Note: the id, current_id, and len(connections_made) are used to help distinguish between nodes as the function
         builds the tree
     """
-    info_type = tree[0] # at a leaf node
+    info_type = tree[0]  # at a leaf node
     if info_type == "Leaf":
-        lines.append(tree[1] + str(id) + str(len(connections_made)) + " [label=" + tree[1] + ", shape=circle];\n")
-        lines.append(last_item_id + " -- " + tree[1] + str(id) + str(len(connections_made)) + " [label=" + \
-            last_item_val + "];\n")
+        lines.append(tree[1] + str(id) + str(len(connections_made)
+                                             ) + " [label=" + tree[1] + ", shape=circle];\n")
+        lines.append(last_item_id + " -- " + tree[1] + str(id) + str(len(connections_made)) + " [label=" +
+                     last_item_val + "];\n")
         return lines
 
     for i in range(2, len(tree)):
-        current_id = 0 # one distinguishing identifier
+        current_id = 0  # one distinguishing identifier
         if info_type == "Attribute":
-            lines.append(tree[1] + str(id) + str(current_id) + " [label=" + tree[1] + ", shape=box];\n")
-            if last_item_id: # if it's not a root node
-                connection = last_item_id + " -- " + tree[1] + str(id) + str(current_id)
-                if connection not in connections_made: # make the connection if not already made
-                    lines.append(last_item_id + " -- " + tree[1] + str(id) + str(current_id) + \
-                        " [label=" + last_item_val + ", shape=box];\n")
+            lines.append(tree[1] + str(id) + str(current_id) +
+                         " [label=" + tree[1] + ", shape=box];\n")
+            if last_item_id:  # if it's not a root node
+                connection = last_item_id + " -- " + \
+                    tree[1] + str(id) + str(current_id)
+                if connection not in connections_made:  # make the connection if not already made
+                    lines.append(last_item_id + " -- " + tree[1] + str(id) + str(current_id) +
+                                 " [label=" + last_item_val + ", shape=box];\n")
                     connections_made.append(connection)
-            make_dotfile(tree[i], lines, id + 1, tree[1] + str(id) + str(current_id), None, connections_made)
-        else: # at a value node
-            new_lines = make_dotfile(tree[i], lines, id + 1, last_item_id, tree[1], connections_made)
+            make_dotfile(tree[i], lines, id + 1, tree[1] +
+                         str(id) + str(current_id), None, connections_made)
+        else:  # at a value node
+            new_lines = make_dotfile(
+                tree[i], lines, id + 1, last_item_id, tree[1], connections_made)
             lines.append(new_lines)
         current_id += 1
     return lines
