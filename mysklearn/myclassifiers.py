@@ -453,3 +453,17 @@ class MyDecisionTreeClassifier:
         f.write("}")
         f.close()
         os.popen("dot -Tpdf -o " + pdf_fname + " " + dot_fname)
+
+class MyRandomForestClassifier:
+    def __init__(self, N=20, M=7, F=2):
+        self.N = N
+        self.M = M
+        self.F = F
+        self.trees = None
+
+    def fit(self, remainder_set, rand_seed=None):
+        for tree in range(self.N):
+            pass
+
+    def predict(self, test_set):
+        pass

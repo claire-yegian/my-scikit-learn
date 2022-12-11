@@ -656,3 +656,27 @@ def test_decision_tree_classifier_predict():
     dt_clf_iphone.fit(X_train_iphone, y_train_iphone)
     iphone_predictions = dt_clf_iphone.predict(X_test_iphone)
     assert iphone_predictions == y_test_iphone
+
+def test_random_forest_classifier_fit():
+    X_interview = [ # header = ["level", "lang", "tweets", "phd", "interviewed_well"]
+        ["Senior", "Java", "no", "no"],
+        ["Senior", "Java", "no", "yes"],
+        ["Mid", "Python", "no", "no"],
+        ["Junior", "Python", "no", "no"],
+        ["Junior", "R", "yes", "no"],
+        ["Junior", "R", "yes", "yes"],
+        ["Mid", "R", "yes", "yes"],
+        ["Senior", "Python", "no", "no"],
+        ["Senior", "R", "yes", "no"],
+        ["Junior", "Python", "yes", "no"],
+        ["Senior", "Python", "yes", "yes"],
+        ["Mid", "Python", "no", "yes"],
+        ["Mid", "Java", "yes", "no"],
+        ["Junior", "Python", "no", "yes"]]
+    y_interview = ["False", "False", "True", "True", "True", "False", "True", \
+        "False", "True", "True", "True", "True", "True", "False"]
+
+    
+
+def test_random_forest_classifier_predict():
+    pass
