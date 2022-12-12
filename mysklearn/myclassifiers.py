@@ -490,10 +490,11 @@ class MyRandomForestClassifier:
         self.N = N
         self.M = M
         self.F = F
-        self.trees = None
+        self.trees = []
 
     def fit(self, X_remainder, y_remainder, rand_seed=None):
-        all_trees = {}
+        all_trees = []
+        all_trees_scores = []
         # generate N trees selecting on F random attributes
         for i in range(self.N):
             # select F attributes to split on
@@ -515,16 +516,31 @@ class MyRandomForestClassifier:
             tree.fit(X_train, y_train)
             scoring_predictions = tree.predict(X_val)
             score = myevaluation.accuracy_score(y_val, scoring_predictions)
-            all_trees[score] = tree
+            all_trees.append(tree)
+            all_trees_scores.append(score)
 
         # pick best scores
-        all_trees = sorted(all_trees)
-        for clf_idx in range(self.M):
-            self.trees.append(all_trees[clf_idx][1])
+        #print(f"All tree scores = {all_trees_scores}")
+        all_trees_idx = [i for i in range(len(all_trees))]
+        all_trees_scores, all_trees_idx = myutils.sort_parallel_lists(all_trees_scores, all_trees_idx)
+        #print(f"Sorted list of scores = {all_trees_scores}")
+        best_tree_idx = all_trees_idx[len(all_trees_idx) - self.M:]
+        #for clf_idx in range(self.M):
+        #    self.trees.append(all_trees[all_trees_idx[clf_idx]])
+        #print("Best tree scores =")
+        for idx in best_tree_idx:
+            self.trees.append(all_trees[idx])
+            #print(all_trees_scores[idx])
 
-    def predict(self, test_set):
-        pass
-
+    def predict(self, X_test):
+        predictions = []
+        for instance in X_test:
+            print(f"Instance = {instance}")
+            votes = []
+            for tree in self.trees:
+                print(f"Tree = {tree.tree}")
+                votes += tree.predict([instance])
+            print("Votes =", votes)
 
 if __name__ == "__main__":
     X_interview = [  # header = ["level", "lang", "tweets", "phd", "interviewed_well"]
@@ -555,4 +571,8 @@ if __name__ == "__main__":
     #print("X_test:", X_test, "\ny_test:", y_test, "\nX_train:", X_train, "\ny_train:", y_train)
     rf_clf = MyRandomForestClassifier()
     rf_clf.fit(X_train, y_train)
-    print("best trees:", rf_clf.trees)
+    rf_clf.predict(X_test)
+
+    # print("best trees:")
+    # for tree in rf_clf.trees:
+    #     print(tree.tree)

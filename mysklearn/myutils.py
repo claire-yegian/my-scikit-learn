@@ -3,6 +3,7 @@ import numpy as np
 
 #from mysklearn import myevaluation
 import myevaluation
+from operator import itemgetter
 
 
 def compute_distance(point1, point2):
@@ -512,3 +513,25 @@ def make_dotfile(tree, lines, id, last_item_id, last_item_val, connections_made)
             lines.append(new_lines)
         current_id += 1
     return lines
+
+def sort_parallel_lists(list1, list2):
+    """sorts two parallel lists while keeping them parallel (sorts on the first list)
+
+        Args:
+            list1(list): first parallel list to be sorted (will determine order)
+            list2(list): second parallel list to be sorted
+
+        Returns:
+            sorted_list1: first parallel list sorted
+            sorted_list2: second parallel list sorted
+    """
+    list_combined = []
+    for index, list1_value in enumerate(list1):
+        list_combined.append([list1_value, list2[index]])
+    sorted_list_combined = sorted(list_combined, key=itemgetter(0))
+    sorted_list1 = []
+    sorted_list2 = []
+    for value in sorted_list_combined:
+        sorted_list1.append(value[0])
+        sorted_list2.append(value[1])
+    return sorted_list1, sorted_list2
