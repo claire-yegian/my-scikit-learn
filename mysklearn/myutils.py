@@ -1,8 +1,8 @@
 import copy
 import numpy as np
 
-# from mysklearn import myevaluation
-import myevaluation
+from mysklearn import myevaluation
+# import myevaluation
 from operator import itemgetter
 
 

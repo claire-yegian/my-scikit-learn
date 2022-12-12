@@ -10,10 +10,10 @@ import numpy as np
 import random
 import os
 
-# from mysklearn import myutils
-# from mysklearn import myevaluation
-import myutils
-import myevaluation
+from mysklearn import myutils
+from mysklearn import myevaluation
+# import myutils
+# import myevaluation
 
 
 class MySimpleLinearRegressor:
@@ -365,9 +365,13 @@ class MyNaiveBayesClassifier:
             prediction = ""
             for classification in self.priors:
                 # list of posteriors for each attribute of the instance
-                instance_posts = [self.posteriors[classification][att_list[i]] for i in range(len(att_list))]
-                probability = np.product(
-                    instance_posts) * self.priors[classification]
+                try:
+                    instance_posts = [self.posteriors[classification][att_list[i]] for i in range(len(att_list))]
+                    probability = np.product(
+                        instance_posts) * self.priors[classification]
+                except KeyError:
+                    prediction = "None"
+                    probability = 0
                 if probability > max_prob:  # keep track of the highest probability classification
                     max_prob = probability
                     prediction = classification
@@ -483,12 +487,21 @@ class MyDecisionTreeClassifier:
 
 class MyRandomForestClassifier:
     def __init__(self, N=20, M=7, F=2):
+        """Initializer for MyRandomForestClassifier.
+        """
         self.N = N
         self.M = M
         self.F = F
         self.trees = []
 
     def fit(self, X_remainder, y_remainder, rand_seed=None):
+        """Generates a random forest with N trees selecting on F random attributes. The
+        M best trees are saved to the model object.
+        Args:
+            X_remainder(list of list of obj): The list of training samples
+                The shape of X_remainder is (n_test_samples, n_features)
+            y_remainder(list of obj): The classifications of the X_remainder training data
+        """
         all_trees = []
         all_trees_scores = []
         # generate N trees selecting on F random attributes
@@ -500,6 +513,8 @@ class MyRandomForestClassifier:
             # generate training and validation sets
             X_train, X_val, y_train, y_val = myevaluation.bootstrap_sample(
                 X_remainder, y_remainder)
+
+            # build, fit, predict, and score the model
             tree = MyDecisionTreeClassifier()
             tree.fit(X_train, y_train, available_attributes=attributes)
             scoring_predictions = tree.predict(X_val)
@@ -507,7 +522,7 @@ class MyRandomForestClassifier:
             all_trees.append(tree)
             all_trees_scores.append(score)
 
-        # pick best scores
+        # pick best scores and save corresponding trees to self.trees
         all_trees_idx = [i for i in range(len(all_trees))]
         all_trees_scores, all_trees_idx = myutils.sort_parallel_lists(
             all_trees_scores, all_trees_idx)
@@ -516,6 +531,13 @@ class MyRandomForestClassifier:
             self.trees.append(all_trees[idx])
 
     def predict(self, X_test):
+        """Makes predictions for test instances in X_test.
+        Args:
+            X_test(list of list of obj): The list of testing samples
+                The shape of X_test is (n_test_samples, n_features)
+        Returns:
+            y_predicted(list of obj): The predicted target y values (parallel to X_test)
+        """
         predictions = []
         for instance in X_test:
             votes = []
