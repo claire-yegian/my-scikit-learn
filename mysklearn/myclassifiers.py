@@ -401,7 +401,7 @@ class MyDecisionTreeClassifier:
         self.attribute_domains = None
         self.tree = None
 
-    def fit(self, X_train, y_train):
+    def fit(self, X_train, y_train, available_attributes=None):
         """Fits a decision tree classifier to X_train and y_train using the TDIDT
         (top down induction of decision tree) algorithm.
         Args:
@@ -409,6 +409,8 @@ class MyDecisionTreeClassifier:
                 The shape of X_train is (n_train_samples, n_features)
             y_train(list of obj): The target y values (parallel to X_train)
                 The shape of y_train is n_train_samples
+            available_attributes(list of str): optional, a list of attributes we're allowed to split 
+                on. If none given, all attributes are available to split on
         Notes:
             Since TDIDT is an eager learning algorithm, this method builds a decision tree model
                 from the training data.
@@ -419,10 +421,12 @@ class MyDecisionTreeClassifier:
         """
         train = [X_train[i] + [y_train[i]]
                  for i in range(len(X_train))]  # class label now at instance[-1]
-        self.header = ["att" + str(i + 1) for i in range(len(train[0]))]
+        self.header = ["att" + str(i + 1) for i in range(len(train[0]) - 1)]
         self.attribute_domains = myutils.get_attributes_dict(
             self.header, train)
-        available_attributes = self.header.copy()[:-1]
+        if not available_attributes:
+            available_attributes = self.header.copy()[:-1]
+
         self.tree = myutils.tdidt(
             train, available_attributes, self.header, self.attribute_domains, len(train))
 
@@ -499,48 +503,37 @@ class MyRandomForestClassifier:
         for i in range(self.N):
             # select F attributes to split on
             attributes = random.sample(range(len(X_remainder[0])), k=self.F)
-            # make a new X set with the F random attributes chosen for this tree
-            new_X = []
-            for instance in range(len(X_remainder)):
-                new_instance = []
-                for att in range(len(X_remainder[0])):
-                    if att in attributes:
-                        new_instance.append(X_remainder[instance][att])
-                new_X.append(new_instance)
-            new_X
+            attributes = ["att" + str(idx + 1) for idx in attributes]
 
             # generate training and validation sets
             X_train, X_val, y_train, y_val = myevaluation.bootstrap_sample(
-                new_X, y_remainder)
+                X_remainder, y_remainder)
             tree = MyDecisionTreeClassifier()
-            tree.fit(X_train, y_train)
+            tree.fit(X_train, y_train, available_attributes=attributes)
             scoring_predictions = tree.predict(X_val)
             score = myevaluation.accuracy_score(y_val, scoring_predictions)
             all_trees.append(tree)
             all_trees_scores.append(score)
 
         # pick best scores
-        #print(f"All tree scores = {all_trees_scores}")
         all_trees_idx = [i for i in range(len(all_trees))]
-        all_trees_scores, all_trees_idx = myutils.sort_parallel_lists(all_trees_scores, all_trees_idx)
-        #print(f"Sorted list of scores = {all_trees_scores}")
+        all_trees_scores, all_trees_idx = myutils.sort_parallel_lists(
+            all_trees_scores, all_trees_idx)
         best_tree_idx = all_trees_idx[len(all_trees_idx) - self.M:]
-        #for clf_idx in range(self.M):
-        #    self.trees.append(all_trees[all_trees_idx[clf_idx]])
-        #print("Best tree scores =")
         for idx in best_tree_idx:
             self.trees.append(all_trees[idx])
-            #print(all_trees_scores[idx])
 
     def predict(self, X_test):
         predictions = []
         for instance in X_test:
-            print(f"Instance = {instance}")
             votes = []
-            for tree in self.trees:
-                print(f"Tree = {tree.tree}")
-                votes += tree.predict([instance])
-            print("Votes =", votes)
+            for tree in self.trees:  # prediction from each of the M best trees
+                votes.append(myutils.tdidt_predict(
+                    tree.tree, instance, tree.header))
+            vote = max(set(votes), key=votes.count)  # majority vote
+            predictions.append(vote)
+        return predictions
+
 
 if __name__ == "__main__":
     X_interview = [  # header = ["level", "lang", "tweets", "phd", "interviewed_well"]

@@ -418,7 +418,7 @@ def tdidt_predict(tree, instance, header):
     Returns:
         str: the class prediction
     """
-    info_type = tree[0]  # Attribute or Leaf
+    info_type = tree[0]  # Attribute, Value, or Leaf
     if info_type == "Leaf":
         return tree[1]  # base case, return label
     # if Attribute node, need to find value
@@ -513,6 +513,7 @@ def make_dotfile(tree, lines, id, last_item_id, last_item_val, connections_made)
             lines.append(new_lines)
         current_id += 1
     return lines
+
 
 def sort_parallel_lists(list1, list2):
     """sorts two parallel lists while keeping them parallel (sorts on the first list)
