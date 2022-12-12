@@ -46,10 +46,8 @@ class MySimpleLinearRegressor:
             y_train(list of numeric vals): The target y values (parallel to X_train)
                 The shape of y_train is n_train_samples
         """
-        X_train = [x[0]
-                   for x in X_train]  # convert 2D list with 1 col to 1D list
-        self.slope, self.intercept = MySimpleLinearRegressor.compute_slope_intercept(X_train,
-                                                                                     y_train)
+        X_train = [x[0] for x in X_train]  # convert 2D list with 1 col to 1D list
+        self.slope, self.intercept = MySimpleLinearRegressor.compute_slope_intercept(X_train, y_train)
 
     def predict(self, X_test):
         """Makes predictions for test samples in X_test.
@@ -367,8 +365,7 @@ class MyNaiveBayesClassifier:
             prediction = ""
             for classification in self.priors:
                 # list of posteriors for each attribute of the instance
-                instance_posts = [self.posteriors[classification]
-                                  [att_list[i]] for i in range(len(att_list))]
+                instance_posts = [self.posteriors[classification][att_list[i]] for i in range(len(att_list))]
                 probability = np.product(
                     instance_posts) * self.priors[classification]
                 if probability > max_prob:  # keep track of the highest probability classification
@@ -419,16 +416,12 @@ class MyDecisionTreeClassifier:
             Store the tree in the tree attribute.
             Use attribute indexes to construct default attribute names (e.g. "att0", "att1", ...).
         """
-        train = [X_train[i] + [y_train[i]]
-                 for i in range(len(X_train))]  # class label now at instance[-1]
-        self.header = ["att" + str(i + 1) for i in range(len(train[0]) - 1)]
-        self.attribute_domains = myutils.get_attributes_dict(
-            self.header, train)
-        if not available_attributes:
+        train = [X_train[i] + [y_train[i]]  for i in range(len(X_train))]  # class label now at instance[-1]
+        self.header = ["att" + str(i + 1) for i in range(len(train[0]))]
+        self.attribute_domains = myutils.get_attributes_dict(self.header, train)
+        if available_attributes is None:
             available_attributes = self.header.copy()[:-1]
-
-        self.tree = myutils.tdidt(
-            train, available_attributes, self.header, self.attribute_domains, len(train))
+        self.tree = myutils.tdidt(train, available_attributes, self.header, self.attribute_domains, len(train))
 
     def predict(self, X_test):
         """Makes predictions for test instances in X_test.
@@ -440,8 +433,7 @@ class MyDecisionTreeClassifier:
         """
         predictions = []
         for instance in X_test:
-            predictions.append(myutils.tdidt_predict(
-                self.tree, instance, self.header))
+            predictions.append(myutils.tdidt_predict(self.tree, instance, self.header))
         return predictions
 
     def print_decision_rules(self, attribute_names=None, class_name="class"):
