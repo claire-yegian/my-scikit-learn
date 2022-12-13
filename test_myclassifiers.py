@@ -8,9 +8,10 @@
 import numpy as np
 from scipy import stats
 
+import mysklearn.myevaluation as myevaluation
 from mysklearn.myclassifiers import MySimpleLinearRegressor, \
     MySimpleLinearRegressionClassifier,MyKNeighborsClassifier, \
-    MyDummyClassifier, MyNaiveBayesClassifier, MyDecisionTreeClassifier
+    MyDummyClassifier, MyNaiveBayesClassifier, MyDecisionTreeClassifier, MyRandomForestClassifier
 
 def high_low_discretizer(value):
     if value <= 100:
@@ -658,7 +659,7 @@ def test_decision_tree_classifier_predict():
     assert iphone_predictions == y_test_iphone
 
 def test_random_forest_classifier_fit():
-    X_interview = [ # header = ["level", "lang", "tweets", "phd", "interviewed_well"]
+    X_interview = [  # header = ["level", "lang", "tweets", "phd", "interviewed_well"]
         ["Senior", "Java", "no", "no"],
         ["Senior", "Java", "no", "yes"],
         ["Mid", "Python", "no", "no"],
@@ -673,10 +674,26 @@ def test_random_forest_classifier_fit():
         ["Mid", "Python", "no", "yes"],
         ["Mid", "Java", "yes", "no"],
         ["Junior", "Python", "no", "yes"]]
-    y_interview = ["False", "False", "True", "True", "True", "False", "True", \
-        "False", "True", "True", "True", "True", "True", "False"]
+    y_interview = ["False", "False", "True", "True", "True", "False", "True",
+                   "False", "True", "True", "True", "True", "True", "False"]
+    splits = myevaluation.stratified_split(
+        X_interview, y_interview, n_splits=3)
+    X_test = [X_interview[idx0] for idx0 in splits[0]]
+    y_test = [y_interview[idx0] for idx0 in splits[0]]
+    X_train = [X_interview[idx1] for idx1 in splits[1]] + \
+        [X_interview[idx2] for idx2 in splits[2]]
+    y_train = [y_interview[idx1] for idx1 in splits[1]] + \
+        [y_interview[idx2] for idx2 in splits[2]]
+    #print("X_test:", X_test, "\ny_test:", y_test, "\nX_train:", X_train, "\ny_train:", y_train)
+    rf_clf = MyRandomForestClassifier()
+    rf_clf.fit(X_train, y_train)
+    rf_clf.predict(X_test)
+
+    print("best trees:")
+    for tree in rf_clf.trees:
+        print(tree.tree)
 
     
 
 def test_random_forest_classifier_predict():
-    pass
+    assert True == False

@@ -12,8 +12,8 @@ import os
 
 from mysklearn import myutils
 from mysklearn import myevaluation
-# import myutils
-# import myevaluation
+#import myutils
+#import myevaluation
 
 
 class MySimpleLinearRegressor:
@@ -547,39 +547,3 @@ class MyRandomForestClassifier:
             vote = max(set(votes), key=votes.count)  # majority vote
             predictions.append(vote)
         return predictions
-
-
-if __name__ == "__main__":
-    X_interview = [  # header = ["level", "lang", "tweets", "phd", "interviewed_well"]
-        ["Senior", "Java", "no", "no"],
-        ["Senior", "Java", "no", "yes"],
-        ["Mid", "Python", "no", "no"],
-        ["Junior", "Python", "no", "no"],
-        ["Junior", "R", "yes", "no"],
-        ["Junior", "R", "yes", "yes"],
-        ["Mid", "R", "yes", "yes"],
-        ["Senior", "Python", "no", "no"],
-        ["Senior", "R", "yes", "no"],
-        ["Junior", "Python", "yes", "no"],
-        ["Senior", "Python", "yes", "yes"],
-        ["Mid", "Python", "no", "yes"],
-        ["Mid", "Java", "yes", "no"],
-        ["Junior", "Python", "no", "yes"]]
-    y_interview = ["False", "False", "True", "True", "True", "False", "True",
-                   "False", "True", "True", "True", "True", "True", "False"]
-    splits = myevaluation.stratified_split(
-        X_interview, y_interview, n_splits=3)
-    X_test = [X_interview[idx0] for idx0 in splits[0]]
-    y_test = [y_interview[idx0] for idx0 in splits[0]]
-    X_train = [X_interview[idx1] for idx1 in splits[1]] + \
-        [X_interview[idx2] for idx2 in splits[2]]
-    y_train = [y_interview[idx1] for idx1 in splits[1]] + \
-        [y_interview[idx2] for idx2 in splits[2]]
-    #print("X_test:", X_test, "\ny_test:", y_test, "\nX_train:", X_train, "\ny_train:", y_train)
-    rf_clf = MyRandomForestClassifier()
-    rf_clf.fit(X_train, y_train)
-    rf_clf.predict(X_test)
-
-    # print("best trees:")
-    # for tree in rf_clf.trees:
-    #     print(tree.tree)

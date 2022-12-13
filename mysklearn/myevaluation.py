@@ -9,7 +9,7 @@
 import numpy as np
 
 from mysklearn import myutils
-# import myutils
+#import myutils
 
 def stratified_kfold_split(X, y, n_splits=5, random_state=None, shuffle=False):
     """Split dataset into stratified cross validation folds.
