@@ -676,6 +676,7 @@ def test_random_forest_classifier_fit():
         ["Junior", "Python", "no", "yes"]]
     y_interview = ["False", "False", "True", "True", "True", "False", "True",
                    "False", "True", "True", "True", "True", "True", "False"]
+    
     splits = myevaluation.stratified_split(
         X_interview, y_interview, n_splits=3)
     X_test = [X_interview[idx0] for idx0 in splits[0]]
@@ -685,7 +686,7 @@ def test_random_forest_classifier_fit():
     y_train = [y_interview[idx1] for idx1 in splits[1]] + \
         [y_interview[idx2] for idx2 in splits[2]]
     #print("X_test:", X_test, "\ny_test:", y_test, "\nX_train:", X_train, "\ny_train:", y_train)
-    rf_clf = MyRandomForestClassifier()
+    rf_clf = MyRandomForestClassifier(5, 2, 2)
     rf_clf.fit(X_train, y_train)
     rf_clf.predict(X_test)
 
