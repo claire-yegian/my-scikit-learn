@@ -6,6 +6,7 @@
 # Description: tests myclassifiers.py
 ##############################################
 import numpy as np
+import copy
 from scipy import stats
 
 import mysklearn.myevaluation as myevaluation
@@ -676,25 +677,76 @@ def test_random_forest_classifier_fit():
         ["Junior", "Python", "no", "yes"]]
     y_interview = ["False", "False", "True", "True", "True", "False", "True",
                    "False", "True", "True", "True", "True", "True", "False"]
+    best_trees = [
+        ['Attribute', 'att4', 
+            ['Value', 'no', 
+                ['Leaf', 'True', 3, 6]
+            ], 
+            ['Value', 'yes', 
+                ['Leaf', 'False', 3, 6]
+            ]
+        ], 
+        ['Attribute', 'att4', 
+            ['Value', 'no', 
+                ['Leaf', 'True', 3, 6]
+            ], 
+            ['Value', 'yes', 
+                ['Attribute', 'att1', 
+                    ['Value', 'Junior', 
+                        ['Leaf', 'False', 1, 3]
+                    ], 
+                    ['Value', 'Mid', 
+                        ['Leaf', 'True', 1, 3]
+                    ], 
+                    ['Value', 'Senior', 
+                        ['Leaf', 'False', 1, 3]
+                    ]
+                ]
+            ]
+        ]
+    ]
     
     splits = myevaluation.stratified_split(
         X_interview, y_interview, n_splits=3)
-    X_test = [X_interview[idx0] for idx0 in splits[0]]
-    y_test = [y_interview[idx0] for idx0 in splits[0]]
     X_train = [X_interview[idx1] for idx1 in splits[1]] + \
         [X_interview[idx2] for idx2 in splits[2]]
     y_train = [y_interview[idx1] for idx1 in splits[1]] + \
         [y_interview[idx2] for idx2 in splits[2]]
-    #print("X_test:", X_test, "\ny_test:", y_test, "\nX_train:", X_train, "\ny_train:", y_train)
     rf_clf = MyRandomForestClassifier(5, 2, 2)
-    rf_clf.fit(X_train, y_train)
-    rf_clf.predict(X_test)
-
-    print("best trees:")
+    rf_clf.fit(X_train, y_train, 1)
+    expected_trees = best_trees
+    actual_trees = []
     for tree in rf_clf.trees:
-        print(tree.tree)
-
-    
+        actual_trees.append(tree.tree)
+    assert actual_trees == expected_trees  
 
 def test_random_forest_classifier_predict():
-    assert True == False
+    X_interview = [  # header = ["level", "lang", "tweets", "phd", "interviewed_well"]
+        ["Senior", "Java", "no", "no"],
+        ["Senior", "Java", "no", "yes"],
+        ["Mid", "Python", "no", "no"],
+        ["Junior", "Python", "no", "no"],
+        ["Junior", "R", "yes", "no"],
+        ["Junior", "R", "yes", "yes"],
+        ["Mid", "R", "yes", "yes"],
+        ["Senior", "Python", "no", "no"],
+        ["Senior", "R", "yes", "no"],
+        ["Junior", "Python", "yes", "no"],
+        ["Senior", "Python", "yes", "yes"],
+        ["Mid", "Python", "no", "yes"],
+        ["Mid", "Java", "yes", "no"],
+        ["Junior", "Python", "no", "yes"]]
+    y_interview = ["False", "False", "True", "True", "True", "False", "True",
+                   "False", "True", "True", "True", "True", "True", "False"]
+    splits = myevaluation.stratified_split(
+        X_interview, y_interview, n_splits=3)
+    X_test = [X_interview[idx0] for idx0 in splits[0]]
+    X_train = [X_interview[idx1] for idx1 in splits[1]] + \
+        [X_interview[idx2] for idx2 in splits[2]]
+    y_train = [y_interview[idx1] for idx1 in splits[1]] + \
+        [y_interview[idx2] for idx2 in splits[2]]
+    rf_clf = MyRandomForestClassifier(5, 2, 2)
+    rf_clf.fit(X_train, y_train, 1)
+    expected_predictions = ['True', 'True', 'True', 'True', 'True']
+    actual_predictions = rf_clf.predict(X_test)
+    assert actual_predictions == expected_predictions
