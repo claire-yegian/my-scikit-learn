@@ -1,3 +1,10 @@
+##############################################
+# Programmers: Claire Yegian and Anna Cardinal
+# Class: CPSC 322-01, Fall 2022
+# Final Project
+# 12/14/22
+# Description: helper functions for building testing, and evaluating classifiers
+##############################################
 import copy
 import numpy as np
 import statistics
@@ -5,8 +12,6 @@ from operator import itemgetter
 
 from mysklearn import myevaluation
 from mysklearn.mypytable import MyPyTable
-#import myevaluation
-
 
 def compute_distance(point1, point2):
     """Compute the Euclidean distance between two points of either 2 or 3 dimensions
@@ -206,6 +211,46 @@ def strat_cross_val_predict(k, X, y, n_splits, random_state=9, shuffle=False):
         splits.append(this_split)
     return splits
 
+def binary_cm_table(y_actual, y_pred, labels=None):
+    """Creates a tabulate-able version of a confusion matrix given predicted and actual values
+    Args:
+        y_actual(list of obj): the actual/expected values
+        y_pred(list of obj): parallel to y_actual, the predicted values
+        labels(list of str): the labels for the rows
+    Returns:
+        list of lists: containing TP, TN, FP, FN in the right layout, as well as totals and the
+            left-hand labels (right-hand will be added when tabulate is called)
+    """
+    if labels:
+        c_matrix = myevaluation.confusion_matrix(y_actual, y_pred, labels)
+    else:
+        c_matrix = myevaluation.confusion_matrix(y_actual, y_pred, ['yes', 'no'])
+    c_matrix[0].append(c_matrix[0][0] + c_matrix[0][1])
+    c_matrix[1].append(c_matrix[1][0] + c_matrix[1][1])
+    if labels:
+        c_matrix[0].insert(0, labels[0])
+        c_matrix[1].insert(0, labels[1])
+    else:
+        c_matrix[0].insert(0, 'yes')
+        c_matrix[1].insert(0, 'no')
+    c_matrix.append(["total", c_matrix[0][1] + c_matrix[1][1], c_matrix[0][2] + c_matrix[1][2], \
+        c_matrix[0][3] + c_matrix[1][3]])
+    return c_matrix
+
+def cm_table(y_actual, y_pred, labels):
+    """Creates a tabulate-able version of a confusion matrix given predicted and actual values
+    Args:
+        y_actual(list of obj): the actual/expected values
+        y_pred(list of obj): parallel to y_actual, the predicted values
+    Returns:
+        list of lists: containing TP, TN, FP, FN in the right layout, as well as totals and the
+            left-hand labels (right-hand will be added when tabulate is called)
+    """
+    c_matrix = myevaluation.confusion_matrix(y_actual, y_pred, labels)
+    col_sums = [0 for col in c_matrix[0]]
+    for row in range(len(c_matrix)):
+        c_matrix[row].insert(0, labels[row])
+    return c_matrix
 
 def confusion_matrix_values(predicted, actual, positive_class):
     """Finds and returns true positive, true negative, false positive, and false negative

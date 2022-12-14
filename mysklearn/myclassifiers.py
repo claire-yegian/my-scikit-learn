@@ -1,10 +1,10 @@
 ##############################################
-# Programmer: Claire Yegian
+# Programmers: Claire Yegian and Anna Cardinal
 # Class: CPSC 322-01, Fall 2022
-# Programming Assignment #7
-# 11/21/22
-# Description: basic functions for five classifiers: simple linear regressoion,
-# k nearest neighbors, dummy, naive bayes, and decision tree
+# Final Project
+# 12/14/22
+# Description: basic functions for six classifiers: simple linear regressoion,
+# k nearest neighbors, dummy, naive bayes, decision tree, and random forrest
 ##############################################
 import numpy as np
 import random
@@ -12,9 +12,6 @@ import os
 
 from mysklearn import myutils
 from mysklearn import myevaluation
-#import myutils
-#import myevaluation
-
 
 class MySimpleLinearRegressor:
     """Represents a simple linear regressor. Used in the MySimpleLinearRegressionClassifier
@@ -522,10 +519,7 @@ class MyRandomForestClassifier:
             score = myevaluation.accuracy_score(y_val, scoring_predictions)
             all_trees.append(tree)
             all_trees_scores.append(score)
-        #print("All Trees:")
-        #for index, tree in enumerate(all_trees):
-            #print("tree: ", tree.tree)
-            #print("accuracy: ", all_trees_scores[index])
+
         # pick best scores and save corresponding trees to self.trees
         all_trees_idx = [i for i in range(len(all_trees))]
         all_trees_scores, all_trees_idx = myutils.sort_parallel_lists(

@@ -1,8 +1,8 @@
 ##############################################
-# Programmer: Claire Yegian
+# Programmers: Claire Yegian and Anna Cardinal
 # Class: CPSC 322-01, Fall 2022
-# Programming Assignment #7
-# 11/21/22
+# Final Project
+# 12/14/22
 # Description: tests myclassifiers.py
 ##############################################
 import numpy as np

@@ -1,15 +1,14 @@
 ##############################################
-# Programmer: Claire Yegian
+# Programmers: Claire Yegian and Anna Cardinal
 # Class: CPSC 322-01, Fall 2022
-# Programming Assignment #7
-# 11/21/22
+# Final Project
+# 12/14/22
 # Description: functions to form training and testing sets and to
 # evaluate classifiers
 ##############################################
 import numpy as np
 
 from mysklearn import myutils
-#import myutils
 
 def stratified_kfold_split(X, y, n_splits=5, random_state=None, shuffle=False):
     """Split dataset into stratified cross validation folds.

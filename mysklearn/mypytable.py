@@ -1,7 +1,14 @@
+##############################################
+# Programmers: Claire Yegian and Anna Cardinal
+# Class: CPSC 322-01, Fall 2022
+# Final Project
+# 12/14/22
+# Description: Stores data in a table, includes functions to clean data
+##############################################
 import copy
 import csv
 import statistics as stats
-import tabulate as tabulate
+from tabulate import tabulate
 
 class MyPyTable:
     """Represents a 2D table of data with column names.
@@ -262,7 +269,7 @@ class MyPyTable:
                 row = [col_names[col], minimum, maximum, mid, avg, med]
                 summary_stats.append(row)
 
-        return MyPyTable(summary_stats_headers, summary_stats)
+        return MyPyTable(column_names=summary_stats_headers, data=summary_stats)
 
     def make_joined_header(self, table1_cols, table2_cols, key_column_names):
         """Return a new header that combines the headers of the two tables
