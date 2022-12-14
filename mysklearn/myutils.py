@@ -86,12 +86,13 @@ def compute_equal_frequency_cutoffs(instances, num_bins):
     return cutoffs
 
 
-def discretize_with_cut_offs(y_values, cut_offs: list):
+def discretize_with_cut_offs(y_values, cut_offs: list, labels:list):
     """discretizes a set of data based on given cut off values.
 
         Args:
             y_values(list of ints): continuous values to be categorized
             cut_offs(list): list of intervals with which to split data set
+            labels(list of strings): list of string values to be associated with each discretized value (from lowest to highest)
         Returns:
             float: discretized values of y_values
     """
@@ -108,13 +109,13 @@ def discretize_with_cut_offs(y_values, cut_offs: list):
             y_copy[y_index] = subrange
     for index, value in enumerate(y_copy):
         if value == 1:
-            y_copy[index] = "least popular"
+            y_copy[index] = labels[0]
         elif value == 2:
-            y_copy[index] = "less popular"
+            y_copy[index] = labels[1]
         elif value == 3:
-            y_copy[index] = "popular"
+            y_copy[index] = labels[2]
         else:
-            y_copy[index] = "very popular"
+            y_copy[index] = labels[3]
     return y_copy
 
 

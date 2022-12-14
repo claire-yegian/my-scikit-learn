@@ -522,10 +522,10 @@ class MyRandomForestClassifier:
             score = myevaluation.accuracy_score(y_val, scoring_predictions)
             all_trees.append(tree)
             all_trees_scores.append(score)
-        print("All Trees:")
-        for index, tree in enumerate(all_trees):
-            print("tree: ", tree.tree)
-            print("accuracy: ", all_trees_scores[index])
+        #print("All Trees:")
+        #for index, tree in enumerate(all_trees):
+            #print("tree: ", tree.tree)
+            #print("accuracy: ", all_trees_scores[index])
         # pick best scores and save corresponding trees to self.trees
         all_trees_idx = [i for i in range(len(all_trees))]
         all_trees_scores, all_trees_idx = myutils.sort_parallel_lists(
