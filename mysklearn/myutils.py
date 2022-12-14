@@ -1,9 +1,11 @@
 import copy
 import numpy as np
+import statistics
+from operator import itemgetter
 
 from mysklearn import myevaluation
+from mysklearn.mypytable import MyPyTable
 #import myevaluation
-from operator import itemgetter
 
 
 def compute_distance(point1, point2):
@@ -536,3 +538,70 @@ def sort_parallel_lists(list1, list2):
         sorted_list1.append(value[0])
         sorted_list2.append(value[1])
     return sorted_list1, sorted_list2
+
+def compute_slope_intercept(x, y):
+    """Calculate the slope and intercept for a given set of x and y values
+    Args:
+        x(list): the x values of the data we're fitting
+        y(list): the y values of the date we're fitting
+    
+    Returns:
+        int: the slope
+        int: the intercept
+    """
+    meanx = statistics.mean(x)
+    meany = statistics.mean(y)
+
+    m = sum([(x[i] - meanx) * (y[i] - meany) for i in range(len(x))]) \
+        / sum([(x[i] - meanx) ** 2 for i in range(len(x))])
+    
+    # y = mx + b => b = y - mx
+    b = meany - m * meanx
+    return m, b
+
+def correlation_coefficient(x, y):
+    """Calculate the correlation coefficient for a given set of x and y values
+    Args:
+        x(list): the x values of the data we're fitting
+        y(list): the y values of the date we're fitting
+    
+    Returns:
+        int: the correlation coefficient
+    """
+    if len(x) != len(y): # raise an exception if x and y are obviously not parallel
+        raise Exception("x and y do not correspond; they have different lengths.")
+    
+    # find all the values we'll need to plug into the correlation coefficient equation
+    sumxy, sumx, sumy, sumx2, sumy2 = 0, 0, 0, 0, 0
+    n = len(x)
+    for i in range(len(x)):
+        sumxy += x[i] * y[i]
+        sumx += x[i]
+        sumy += y[i]
+        sumx2 += x[i] ** 2
+        sumy2 += y[i] ** 2
+    # correlation coefficient equation
+    return ((n * sumxy - sumx * sumy) / ((n * sumx2 - sumx ** 2) * (n * sumy2 - sumy ** 2)) ** 0.5)
+
+def covariance(x, y):
+    """Calculate the covariance for a given set of x and y values
+    Args:
+        x(list): the x values of the data we're fitting
+        y(list): the y values of the date we're fitting
+    
+    Returns:
+        int: the covariance
+    """
+    if len(x) != len(y): # raise an exception if x and y are obviously not parallel
+        raise Exception("x and y do not correspond; they have different lengths.")
+    
+    # find all the values we'll need to plug into the covariance equation
+    n = len(x)
+    meanx = statistics.mean(x)
+    meany = statistics.mean(y)
+
+    sum = 0
+    for i in range(len(x)):
+        sum += (x[i] - meanx) * (y[i] - meany)
+    # covariance equation
+    return sum/n
