@@ -1,11 +1,12 @@
-##############################################
+"""
 # Programmers: Claire Yegian and Anna Cardinal
 # Class: CPSC 322-01, Fall 2022
 # Final Project
 # 12/14/22
 # Description: functions to form training and testing sets and to
 # evaluate classifiers
-##############################################
+"""
+
 import numpy as np
 
 from mysklearn import myutils
@@ -89,7 +90,6 @@ def bootstrap_sample(X, y=None, n_samples=None, random_state=None):
     """
     if n_samples is None:
         n_samples = len(X)
-    
     if random_state is None:
         np.random.seed(0)
     else:
@@ -100,7 +100,6 @@ def bootstrap_sample(X, y=None, n_samples=None, random_state=None):
     for i in range(len(X)):
         if not i in sampled:
             out_of_bag.append(i)
-    
     if y is None:
         return [X[i] for i in sampled], [X[j] for j in out_of_bag], None, None
     return [X[i] for i in sampled], [X[j] for j in out_of_bag], [y[i] for i in sampled], [y[j] for j in out_of_bag]

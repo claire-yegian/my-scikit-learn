@@ -1,13 +1,13 @@
-##############################################
+"""
 # Programmers: Claire Yegian and Anna Cardinal
 # Class: CPSC 322-01, Fall 2022
 # Final Project
 # 12/14/22
 # Description: Stores data in a table, includes functions to clean data
-##############################################
+"""
+
 import copy
 import csv
-import statistics as stats
 from tabulate import tabulate
 
 class MyPyTable:

@@ -1,16 +1,15 @@
-##############################################
+"""
 # Programmers: Claire Yegian and Anna Cardinal
 # Class: CPSC 322-01, Fall 2022
 # Final Project
 # 12/14/22
 # Description: helper functions for plotting data (used in our EDA)
-##############################################
+"""
+
 import copy
 import matplotlib.pyplot as plt
-import numpy as np
 
 from mysklearn import myutils
-from mysklearn.mypytable import MyPyTable
 
 def simple_bar_chart(x_axis_data, y_axis_data, labels=None, bar_width=20, bar_height=5):
     """Makes a basic bar chart.
@@ -43,13 +42,13 @@ def histogram(table, attribute, label):
     """Creates a histogram for an attribute of a MyPyTable object
     Args:
         table(MyPyTable): the MyPyTable object with the data
-        attribute(str): the attribute we're finding and graphing the 
+        attribute(str): the attribute we're finding and graphing the
             distribution of
         label(str): the label to use for the x axis and title
     """
     plt.figure(figsize = (8, 5.5))
     col = table.get_column(attribute)
-    
+
     plt.hist(col, bins=10, edgecolor="white")
     plt.ylabel("Count")
     plt.xlabel(label)
@@ -62,7 +61,7 @@ def scatter_plot(table, x, y, labels=None):
         table(MyPyTable): the MyPyTable object with the data
         x(str or list): the attribute we're graphing on the x axis
         y(str or list): the attribute we're graphing on the y axis
-        labels(list of str): if x and y are lists, labels is the string labels for the 
+        labels(list of str): if x and y are lists, labels is the string labels for the
             x and y axes of the graph
     Note: x and y must be of the same type: either both strings or both lists
     """

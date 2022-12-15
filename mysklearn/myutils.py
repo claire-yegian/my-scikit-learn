@@ -1,17 +1,16 @@
-##############################################
+"""
 # Programmers: Claire Yegian and Anna Cardinal
 # Class: CPSC 322-01, Fall 2022
 # Final Project
 # 12/14/22
 # Description: helper functions for building testing, and evaluating classifiers
-##############################################
-import copy
-import numpy as np
+"""
+
 import statistics
 from operator import itemgetter
+import numpy as np
 
 from mysklearn import myevaluation
-from mysklearn.mypytable import MyPyTable
 
 def compute_distance(point1, point2):
     """Compute the Euclidean distance between two points of either 2 or 3 dimensions
@@ -83,6 +82,16 @@ def get_frequency_of_multiple_values(target_values, all_value_instances):
 
 
 def compute_equal_frequency_cutoffs(instances, num_bins):
+    """finds the cutoff points in a list of instances that gives each bin an equal or close to equal
+        data distribution
+
+        Args:
+            instances(list of lists): list of data instances
+            num_bins(int): number of bins instances are to be divided into
+
+        Returns:
+            list of instance values corresponding to each cutoff point
+    """
     bin_size = len(instances)//num_bins
     cutoffs = []
     for i in range(num_bins):
@@ -517,14 +526,13 @@ def tdidt_write_rules(tree, attribute_names, class_name, header):
             rule_list.append(to_add)
     return rule_list
 
-
-def make_dotfile(tree, lines, id, last_item_id, last_item_val, connections_made):
+def make_dotfile(tree, lines, node_id, last_item_id, last_item_val, connections_made):
     """Collects the lines that need to be added to a .dot file in order to make a visual representation of the
         tree using a Graphviz .pdf file.
     Args:
         tree(list of lists): the tree we're trying to visually represent
         lines(list of str): the collection of lines to be written to the .dot file
-        id(int): one of many identifiers used to distinguish between nodes (see note below)
+        node_id(int): one of many identifiers used to distinguish between nodes (see note below)
         last_item_id(str): the full string identifier of the previous node
         last_item_val(str): the value connecting the previous and current nodes
         connections_made(list of str): a record of the connections between nodes, so we don't make the same one twice
@@ -535,29 +543,29 @@ def make_dotfile(tree, lines, id, last_item_id, last_item_val, connections_made)
     """
     info_type = tree[0]  # at a leaf node
     if info_type == "Leaf":
-        lines.append(tree[1] + str(id) + str(len(connections_made)
+        lines.append(tree[1] + str(node_id) + str(len(connections_made)
                                              ) + " [label=" + tree[1] + ", shape=circle];\n")
-        lines.append(last_item_id + " -- " + tree[1] + str(id) + str(len(connections_made)) + " [label=" +
+        lines.append(last_item_id + " -- " + tree[1] + str(node_id) + str(len(connections_made)) + " [label=" +
                      last_item_val + "];\n")
         return lines
 
     for i in range(2, len(tree)):
         current_id = 0  # one distinguishing identifier
         if info_type == "Attribute":
-            lines.append(tree[1] + str(id) + str(current_id) +
+            lines.append(tree[1] + str(node_id) + str(current_id) +
                          " [label=" + tree[1] + ", shape=box];\n")
             if last_item_id:  # if it's not a root node
                 connection = last_item_id + " -- " + \
-                    tree[1] + str(id) + str(current_id)
+                    tree[1] + str(node_id) + str(current_id)
                 if connection not in connections_made:  # make the connection if not already made
-                    lines.append(last_item_id + " -- " + tree[1] + str(id) + str(current_id) +
+                    lines.append(last_item_id + " -- " + tree[1] + str(node_id) + str(current_id) +
                                  " [label=" + last_item_val + ", shape=box];\n")
                     connections_made.append(connection)
-            make_dotfile(tree[i], lines, id + 1, tree[1] +
-                         str(id) + str(current_id), None, connections_made)
+            make_dotfile(tree[i], lines, node_id + 1, tree[1] +
+                         str(node_id) + str(current_id), None, connections_made)
         else:  # at a value node
             new_lines = make_dotfile(
-                tree[i], lines, id + 1, last_item_id, tree[1], connections_made)
+                tree[i], lines, node_id + 1, last_item_id, tree[1], connections_made)
             lines.append(new_lines)
         current_id += 1
     return lines
@@ -590,7 +598,7 @@ def compute_slope_intercept(x, y):
     Args:
         x(list): the x values of the data we're fitting
         y(list): the y values of the date we're fitting
-    
+
     Returns:
         int: the slope
         int: the intercept
@@ -600,7 +608,6 @@ def compute_slope_intercept(x, y):
 
     m = sum([(x[i] - meanx) * (y[i] - meany) for i in range(len(x))]) \
         / sum([(x[i] - meanx) ** 2 for i in range(len(x))])
-    
     # y = mx + b => b = y - mx
     b = meany - m * meanx
     return m, b
@@ -610,13 +617,13 @@ def correlation_coefficient(x, y):
     Args:
         x(list): the x values of the data we're fitting
         y(list): the y values of the date we're fitting
-    
+
     Returns:
         int: the correlation coefficient
     """
     if len(x) != len(y): # raise an exception if x and y are obviously not parallel
         raise Exception("x and y do not correspond; they have different lengths.")
-    
+
     # find all the values we'll need to plug into the correlation coefficient equation
     sumxy, sumx, sumy, sumx2, sumy2 = 0, 0, 0, 0, 0
     n = len(x)
@@ -627,27 +634,27 @@ def correlation_coefficient(x, y):
         sumx2 += x[i] ** 2
         sumy2 += y[i] ** 2
     # correlation coefficient equation
-    return ((n * sumxy - sumx * sumy) / ((n * sumx2 - sumx ** 2) * (n * sumy2 - sumy ** 2)) ** 0.5)
+    return (n * sumxy - sumx * sumy) / ((n * sumx2 - sumx ** 2) * (n * sumy2 - sumy ** 2)) ** 0.5
 
 def covariance(x, y):
     """Calculate the covariance for a given set of x and y values
     Args:
         x(list): the x values of the data we're fitting
         y(list): the y values of the date we're fitting
-    
+
     Returns:
         int: the covariance
     """
     if len(x) != len(y): # raise an exception if x and y are obviously not parallel
         raise Exception("x and y do not correspond; they have different lengths.")
-    
+
     # find all the values we'll need to plug into the covariance equation
     n = len(x)
     meanx = statistics.mean(x)
     meany = statistics.mean(y)
 
-    sum = 0
+    total_sum = 0
     for i in range(len(x)):
-        sum += (x[i] - meanx) * (y[i] - meany)
+        total_sum += (x[i] - meanx) * (y[i] - meany)
     # covariance equation
-    return sum/n
+    return total_sum/n

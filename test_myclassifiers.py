@@ -1,13 +1,12 @@
-##############################################
+"""
 # Programmers: Claire Yegian and Anna Cardinal
 # Class: CPSC 322-01, Fall 2022
 # Final Project
 # 12/14/22
 # Description: tests myclassifiers.py
-##############################################
+"""
+
 import numpy as np
-import copy
-from scipy import stats
 
 import mysklearn.myevaluation as myevaluation
 from mysklearn.myclassifiers import MySimpleLinearRegressor, \
@@ -678,34 +677,34 @@ def test_random_forest_classifier_fit():
     y_interview = ["False", "False", "True", "True", "True", "False", "True",
                    "False", "True", "True", "True", "True", "True", "False"]
     best_trees = [
-        ['Attribute', 'att4', 
-            ['Value', 'no', 
+        ['Attribute', 'att4',
+            ['Value', 'no',
                 ['Leaf', 'True', 3, 6]
-            ], 
-            ['Value', 'yes', 
+            ],
+            ['Value', 'yes',
                 ['Leaf', 'False', 3, 6]
             ]
-        ], 
-        ['Attribute', 'att4', 
-            ['Value', 'no', 
+        ],
+        ['Attribute', 'att4',
+            ['Value', 'no',
                 ['Leaf', 'True', 3, 6]
-            ], 
-            ['Value', 'yes', 
-                ['Attribute', 'att1', 
-                    ['Value', 'Junior', 
+            ],
+            ['Value', 'yes',
+                ['Attribute', 'att1',
+                    ['Value', 'Junior',
                         ['Leaf', 'False', 1, 3]
-                    ], 
-                    ['Value', 'Mid', 
+                    ],
+                    ['Value', 'Mid',
                         ['Leaf', 'True', 1, 3]
-                    ], 
-                    ['Value', 'Senior', 
+                    ],
+                    ['Value', 'Senior',
                         ['Leaf', 'False', 1, 3]
                     ]
                 ]
             ]
         ]
     ]
-    
+
     splits = myevaluation.stratified_split(
         X_interview, y_interview, n_splits=3)
     X_train = [X_interview[idx1] for idx1 in splits[1]] + \
@@ -718,7 +717,7 @@ def test_random_forest_classifier_fit():
     actual_trees = []
     for tree in rf_clf.trees:
         actual_trees.append(tree.tree)
-    assert actual_trees == expected_trees  
+    assert actual_trees == expected_trees
 
 def test_random_forest_classifier_predict():
     X_interview = [  # header = ["level", "lang", "tweets", "phd", "interviewed_well"]

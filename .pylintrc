@@ -1,0 +1,18 @@
+# following https://github.com/kubeflow/examples/blob/master/.pylintrc
+[BASIC]
+
+# Good variable names which should always be accepted, separated by a comma
+good-names=i,j,k,n,m,b,r,v,v1,v2,cv,xs,ys,x,X,y,_,f1,P,N,F,M,
+good-names-rgxs=^X_,^X_
+
+[FORMAT]
+
+# Maximum number of characters on a single line.
+max-line-length=150
+
+[DESIGN]
+
+# Maximum number of arguments for function / method
+max-args=10
+# Maximum number of locals for function / method body
+max-locals=30

@@ -1,14 +1,15 @@
-##############################################
+"""
 # Programmers: Claire Yegian and Anna Cardinal
 # Class: CPSC 322-01, Fall 2022
 # Final Project
 # 12/14/22
 # Description: basic functions for six classifiers: simple linear regressoion,
 # k nearest neighbors, dummy, naive bayes, decision tree, and random forrest
-##############################################
-import numpy as np
+"""
+
 import random
 import os
+import numpy as np
 
 from mysklearn import myutils
 from mysklearn import myevaluation
@@ -407,7 +408,7 @@ class MyDecisionTreeClassifier:
                 The shape of X_train is (n_train_samples, n_features)
             y_train(list of obj): The target y values (parallel to X_train)
                 The shape of y_train is n_train_samples
-            available_attributes(list of str): optional, a list of attributes we're allowed to split 
+            available_attributes(list of str): optional, a list of attributes we're allowed to split
                 on. If none given, all attributes are available to split on
         Notes:
             Since TDIDT is an eager learning algorithm, this method builds a decision tree model
@@ -471,18 +472,25 @@ class MyDecisionTreeClassifier:
             DOT language: https://graphviz.org/doc/info/lang.html
             You will need to install graphviz in the Docker container as shown in class to complete this method.
         """
-        f = open(dot_fname, "w")
-        f.write("graph g { \n")
+        file = open(dot_fname, "w")
+        file.write("graph g { \n")
         lines = myutils.make_dotfile(self.tree, [], 0, None, None, [])
         for line in lines:
-            if type(line) == str:
-                f.write(line)
-        f.write("}")
-        f.close()
+            if isinstance(line, str):
+                file.write(line)
+        file.write("}")
+        file.close()
         os.popen("dot -Tpdf -o " + pdf_fname + " " + dot_fname)
 
 
 class MyRandomForestClassifier:
+    """Represents a Random Forest classifier.
+    Attributes:
+        N(int): number of trees to generate
+        M(int): number of best trees to pick from N generated
+        F(int): number of attributes to make trees with
+        trees(list of trees): list of chosen trees to make predictions with
+    """
     def __init__(self, N=20, M=7, F=2):
         """Initializer for MyRandomForestClassifier.
         """
