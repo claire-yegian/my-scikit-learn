@@ -1,7 +1,5 @@
 """
-# Programmers: Claire Yegian and Anna Cardinal
-# Class: CPSC 322-01, Fall 2022
-# Final Project
+# Programmers: Claire Yegian
 # 12/14/22
 # Description: functions to form training and testing sets and to
 # evaluate classifiers
