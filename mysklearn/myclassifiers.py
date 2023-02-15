@@ -1,7 +1,5 @@
 """
 # Programmers: Claire Yegian and Anna Cardinal
-# Class: CPSC 322-01, Fall 2022
-# Final Project
 # 12/14/22
 # Description: basic functions for six classifiers: simple linear regression,
 # k nearest neighbors, dummy, naive bayes, decision tree, and random forrest
