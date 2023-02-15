@@ -656,3 +656,63 @@ def covariance(x, y):
         total_sum += (x[i] - meanx) * (y[i] - meany)
     # covariance equation
     return total_sum/n
+
+######################################################
+#Rule miner helper functions
+def prepend_attribute_label(table, header):
+    for row in table:
+        for i in range(len(row)):
+            row[i] = header[i] + "=" + str(row[i])
+
+def check_row_match(terms, row):
+    # return 1 if all the terms are in the row (match)
+    # return 0 otherwise
+    for term in terms:
+        if term not in row:
+            return 0
+    return 1
+
+def find_supported_itemsets(itemset, data, minsup):
+    supported_itemsets = set()
+    for element in itemset:
+        element = list(element)
+        count = 0
+        for instance in data:
+            if check_row_match(element, instance) == 1:
+                count += 1
+        if count/len(data) >= minsup:
+            supported_itemsets.add(frozenset(element))
+    return supported_itemsets
+
+def compute_rule_counts(rule, table):
+    Nleft = Nright = Nboth = 0
+    Ntotal = len(table)
+    for row in table:
+        Nleft += check_row_match(rule["lhs"], row)
+        Nright += check_row_match(rule["rhs"], row)
+        Nboth += check_row_match(rule["lhs"] + rule["rhs"], row)
+    return Nleft, Nright, Nboth, Ntotal
+
+def compute_rule_interestingness(rule, table):
+    Nleft, Nright, Nboth, Ntotal = compute_rule_counts(rule, table)
+    print(Nleft, Nright, Nboth, Ntotal)
+    rule["confidence"] = Nboth / Nleft
+    rule["support"] = Nboth / Ntotal
+    rule["completeness"] = Nboth / Nright
+
+def compute_unique_values(table):
+    unique = set()
+    for row in table:
+        for value in row: 
+            unique.add(value)
+    return sorted(list(unique))
+
+def compute_joined_candidates(itemset):
+    candidates = set()
+    for item in itemset:
+        for other_item in itemset:
+            if len(item) == 1 or sorted(item)[:-1] == sorted(other_item)[:-1]:
+                if sorted(item) != sorted(other_item):
+                    to_add = item.union(other_item)
+                    candidates.add(to_add)
+    return candidates
